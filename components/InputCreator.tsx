@@ -1,19 +1,24 @@
-import React, { useContext, useState } from "react";
-import { InputType } from "zlib";
-import { FormBuilderContext } from "../pages/FormBuilder";
-import { InputConfig, TYPEINPUT } from "../typedef/formBuilderType";
+import React, {useContext, useState} from "react";
+import {InputType} from "zlib";
+import {FormBuilderContext} from "../pages/FormBuilder";
+import {InputConfig, TYPEINPUT} from "../typedef/formBuilderType";
 import HeaderTitle from "./HeaderTitle";
 
 type Props = {};
 
 function RenderValidate({
-    title,
-    name,
-    isRequiredCheck,
-}: {
+                            title,
+                            name,
+                            isRequiredCheck,
+                            defaultValue,
+                            msg
+
+                        }: {
     title: string;
     name: string;
     isRequiredCheck: boolean;
+    defaultValue: any | undefined
+    msg: string | undefined
 }) {
     return (
         <div className="flex-horizontal">
@@ -22,16 +27,16 @@ function RenderValidate({
                     {title}:
                 </label>
                 {isRequiredCheck ? (
-                    <input type="checkbox" name={name} className="w-6 h-6" />
+                    <input type="checkbox" name={name} className="w-6 h-6" checked={!!defaultValue}/>
                 ) : (
-                    <input type="input" className="small-input" name={name} />
+                    <input type="input" className="small-input flex-grow" name={name} defaultValue={defaultValue}/>
                 )}
             </div>
             <div className="w-1/2 flex gap-2 items-center">
-                <label htmlFor={`${"msg" + name}`} className="w-20">
+                <label htmlFor={`${"msg" + name}`} className="w-10">
                     Msg:
                 </label>
-                <input type="input" name={`${"msg" + name}`} className="small-input flex-grow" />
+                <input type="input" name={`${"msg" + name}`} className="small-input flex-grow" defaultValue={msg}/>
             </div>
         </div>
     );
@@ -42,69 +47,24 @@ export default function InputCreator({}: Props) {
     const choosingInput = configContext?.inputConfigs.find(
         (item) => item.id === configContext.choosingConfigId
     );
-    const [isShowValidate, setShowValidate] = useState<boolean>(false);
 
-    function setInputNameProperty(value: string) {
+    function setInputConfig(config:InputConfig){
         if (configContext && choosingInput) {
             const temp = configContext.inputConfigs.map((item) => {
-                if (item.id === choosingInput.id) {
-                    item.name = value;
+                if (item.id === config.id) {
+                    return config
                 }
                 return item;
             });
             configContext.setInputConfig(temp);
         }
     }
-    function setInputLabelProperty(value: string) {
-        if (configContext && choosingInput) {
-            const temp = configContext.inputConfigs.map((item) => {
-                if (item.id === choosingInput.id) {
-                    item.label = value;
-                }
-                return item;
-            });
-            configContext.setInputConfig(temp);
-        }
-    }
-    function setInputColWidthProperty(value: number) {
-        if (configContext && choosingInput) {
-            const temp = configContext.inputConfigs.map((item) => {
-                if (item.id === choosingInput.id) {
-                    item.layout = value;
-                }
-                return item;
-            });
-            configContext.setInputConfig(temp);
-        }
-    }
-    function setInputDefaultValueProperty(value: string | number) {
-        if (configContext && choosingInput) {
-            const temp = configContext.inputConfigs.map((item) => {
-                if (item.id === choosingInput.id) {
-                    item.defaultValue = value;
-                }
-                return item;
-            });
-            configContext.setInputConfig(temp);
-        }
-    }
-    function setInputTypeProperty(value: TYPEINPUT) {
-        if (configContext && choosingInput) {
-            const temp = configContext.inputConfigs.map((item) => {
-                if (item.id === choosingInput.id) {
-                    item.type = value;
-                }
-                return item;
-            });
-            configContext.setInputConfig(temp);
-        }
-    }
-
+    const [inputType , setInputType] = useState(TYPEINPUT.TEXTINPUT)
     if (!configContext || !choosingInput)
         return (
             <div className="shadow-lg p-4 flex gap-4 flex-col ">
                 <div className="w-full text-center">
-                    <HeaderTitle title="Input Creator" />
+                    <HeaderTitle title="Input Creator"/>
                 </div>
                 <code className="w-full text-center">Hãy tạo một input!</code>
             </div>
@@ -112,7 +72,7 @@ export default function InputCreator({}: Props) {
     return (
         <div className="shadow-lg p-4 flex gap-4 flex-col ">
             <div className="w-full text-center">
-                <HeaderTitle title="Input Creator" />
+                <HeaderTitle title="Input Creator"/>
             </div>
             {/* Name input  */}
             <label htmlFor="name">Input Name :</label>
@@ -121,7 +81,10 @@ export default function InputCreator({}: Props) {
                 required
                 className="input"
                 value={choosingInput.name}
-                onChange={(e) => setInputNameProperty(e.target.value)}
+                onChange={(e) => {
+                    const temp = { ... choosingInput ,name : e.target.value }
+                    setInputConfig(temp)
+                }}
             ></input>
             {/* Label input  */}
             <label htmlFor="name">Input label :</label>
@@ -129,7 +92,10 @@ export default function InputCreator({}: Props) {
                 name="label"
                 className="input"
                 value={choosingInput.label}
-                onChange={(e) => setInputLabelProperty(e.target.value)}
+                onChange={(e) => {
+                    const temp = { ... choosingInput ,label : e.target.value }
+                    setInputConfig(temp)
+                }}
             ></input>
             {/* Col width */}
             <label htmlFor="name">Col width :</label>
@@ -144,25 +110,33 @@ export default function InputCreator({}: Props) {
                     const value = parseInt(e.target.value);
                     if (value > 12) e.preventDefault();
                     else {
-                        setInputColWidthProperty(value);
+                        const temp = { ... choosingInput ,layout : value }
+                        setInputConfig(temp)
                     }
                 }}
             />
             {/* Default value */}
             <label htmlFor="name">Default Value :</label>
             <input
-                name="name"
+                name="defaultValue"
                 className="input"
                 value={choosingInput.defaultValue}
-                onChange={(e) => setInputDefaultValueProperty(e.target.value)}
+                onChange={(e) => {
+                    const temp = { ... choosingInput ,defaultValue : e.target.value }
+                    setInputConfig(temp)
+                }}
             />
             {/* Type input */}
             <label htmlFor="type">Input Type:</label>
             <select
                 name="type"
-                className="input text-xl"
+                className="input "
                 value={choosingInput.type}
-                onChange={(e) => setInputTypeProperty(e.target.value as keyof InputType)}
+                onChange={(e) => {
+                    setInputType(+e.target.value as keyof InputType)
+                    const temp = { ... choosingInput ,type : +e.target.value as keyof InputType }
+                    setInputConfig(temp)
+                }}
             >
                 {(Object.keys(TYPEINPUT) as Array<keyof typeof TYPEINPUT>).map((key, index) => {
                     if (isNaN(parseInt(key)))
@@ -175,32 +149,51 @@ export default function InputCreator({}: Props) {
                 })}
             </select>
             {/* validate */}
-            <div className="flex gap-4 items-center ">
-                <label htmlFor="showValidate">Show validate:</label>
-                <input
-                    type="checkbox"
-                    name="showValidate"
-                    id="3"
-                    className="w-6 h-6"
-                    onChange={(e) => setShowValidate(e.target.checked)}
-                />
+            <div className="flex-vertical">
+                {RenderValidate({
+                    isRequiredCheck: true,
+                    name: "required",
+                    title: "Required",
+                    defaultValue: choosingInput?.validation?.required?.value,
+                    msg: choosingInput?.validation?.required?.msg
+                })}
+                {RenderValidate({
+                    isRequiredCheck: false,
+                    name: "max",
+                    title: "Max value",
+                    defaultValue: choosingInput?.validation?.max?.value,
+                    msg: choosingInput?.validation?.max?.msg
+                })}
+                {RenderValidate({
+                    isRequiredCheck: false,
+                    name: "min",
+                    title: "Min value",
+                    defaultValue: choosingInput?.validation?.min?.value,
+                    msg: choosingInput?.validation?.min?.msg
+                })}
+                {RenderValidate({
+                    isRequiredCheck: false,
+                    name: "maxLength",
+                    title: "Max length",
+                    defaultValue: choosingInput?.validation?.maxLength?.value,
+                    msg: choosingInput?.validation?.maxLength?.msg
+                })}
+                {RenderValidate({
+                    isRequiredCheck: false,
+                    name: "minLength",
+                    title: "Min length",
+                    defaultValue: choosingInput?.validation?.minLength?.value,
+                    msg: choosingInput?.validation?.minLength?.msg
+                })}
+                {RenderValidate({
+                    isRequiredCheck: false,
+                    name: "pattern",
+                    title: "Format",
+                    defaultValue: choosingInput?.validation?.pattern?.value,
+                    msg: choosingInput?.validation?.pattern?.msg
+                })}
             </div>
-            {isShowValidate && (
-                <div className="flex-vertical">
-                    {RenderValidate({ isRequiredCheck: true, name: "required", title: "Required" })}
-                    {RenderValidate({
-                        isRequiredCheck: false,
-                        name: "maxLength",
-                        title: "Max length",
-                    })}
-                    {RenderValidate({
-                        isRequiredCheck: false,
-                        name: "minLength",
-                        title: "Min length",
-                    })}
-                    {RenderValidate({ isRequiredCheck: false, name: "pattern", title: "Format" })}
-                </div>
-            )}
+
         </div>
     );
 }

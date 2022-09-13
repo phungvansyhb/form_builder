@@ -4,9 +4,26 @@ import { FormBuilderContext } from "../pages/FormBuilder";
 import { InputConfig } from "../typedef/formBuilderType";
 import HeaderTitle from "./HeaderTitle";
 import {css , cx} from '@emotion/css'
+import {Input} from "postcss";
 
 type Props = {};
-const DragHandle = SortableHandle(() => <b>::</b>);
+const DragHandle = SortableHandle(() => <b className='text-2xl'>::</b>);
+
+export const colWidth =(item:InputConfig)=>{
+    if(item.layout ===1) return 'col-span-1'
+    if(item.layout ===2) return 'col-span-2'
+    if(item.layout ===3) return 'col-span-3'
+    if(item.layout ===4) return 'col-span-4'
+    if(item.layout ===5) return 'col-span-5'
+    if(item.layout ===6) return 'col-span-6'
+    if(item.layout ===7) return 'col-span-7'
+    if(item.layout ===8) return 'col-span-8'
+    if(item.layout ===9) return 'col-span-9'
+    if(item.layout ===10) return 'col-span-10'
+    if(item.layout ===12) return 'col-span-12'
+    if(item.layout ===11) return 'col-span-11'
+}
+
 
 const SortableItem = SortableElement<{
     item: InputConfig;
@@ -14,23 +31,10 @@ const SortableItem = SortableElement<{
     const configContext = useContext(FormBuilderContext);
     if (!configContext) return <></>;
     
-    const colWidth =()=>{
-        if(item.layout ===1) return 'col-span-1'   
-        if(item.layout ===2) return 'col-span-2'   
-        if(item.layout ===3) return 'col-span-3'   
-        if(item.layout ===4) return 'col-span-4'   
-        if(item.layout ===5) return 'col-span-5'   
-        if(item.layout ===6) return 'col-span-6'   
-        if(item.layout ===7) return 'col-span-7'   
-        if(item.layout ===8) return 'col-span-8'   
-        if(item.layout ===9) return 'col-span-9'   
-        if(item.layout ===10) return 'col-span-10'   
-        if(item.layout ===12) return 'col-span-12'   
-        if(item.layout ===11) return 'col-span-11'   
-    }
+
     return (
         // <div className={cx(`col-span-${item.layout}`)}>
-        <div className={colWidth()}>
+        <div className={colWidth(item)}>
             <div
                 className={` gap-2 cursor-move  p-2 ${
                     configContext.choosingConfigId === item.id &&
@@ -51,7 +55,7 @@ const SortableItem = SortableElement<{
                 </div>
                 
                 <button
-                    className="btn-primary "
+                    className="btn-primary mr-2"
                     onClick={() => configContext.chooseConfigById(item.id)}
                 >
                     Edit
