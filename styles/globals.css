@@ -8,6 +8,9 @@
 .btn-secondary{
   @apply py-2 px-8 rounded bg-black text-white
 }
+.btn-secondary-small{
+  @apply py-2 px-3 rounded bg-black text-white
+}
 .input{
   @apply flex-grow p-3 rounded-md border border-gray-200
 }

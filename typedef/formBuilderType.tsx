@@ -1,7 +1,7 @@
 export enum TYPEINPUT {
     TEXTINPUT,
-    EMAIL,
-    PHONE,
+    // EMAIL,
+    // PHONE,
     SELECT,
     // RADIO,
     // CHECKBOX,
@@ -31,7 +31,9 @@ export interface InputConfig {
             value: boolean | string | number,
             msg: string
         }
-    }
+    },
+    selectOptions? : { id : number , label  :string , value : string }[]
+    selectApi? : {endpoint  :string , valueKey : string , keyLabel: string }
 }
 
 
