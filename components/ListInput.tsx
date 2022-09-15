@@ -3,8 +3,6 @@ import { arrayMove, SortableContainer, SortableElement, SortableHandle } from "r
 import { FormBuilderContext } from "../pages/FormBuilder";
 import { InputConfig } from "../typedef/formBuilderType";
 import HeaderTitle from "./HeaderTitle";
-import {css , cx} from '@emotion/css'
-import {Input} from "postcss";
 
 type Props = {};
 const DragHandle = SortableHandle(() => <b className='text-2xl'>::</b>);
@@ -62,7 +60,16 @@ const SortableItem = SortableElement<{
                 </button>
                 <button
                     className="btn-secondary"
-                    onClick={() => configContext.clearConfigById(item.id)}
+                    onClick={() => {
+                        configContext.clearConfigById(item.id)
+                        const deletedIndex = configContext.inputConfigs.findIndex(config => config.id === item.id)
+                        let nextIndex = 0;
+                        if(deletedIndex <= configContext.inputConfigs.length -2 ){
+                            nextIndex = deletedIndex + 1
+                        }else nextIndex = deletedIndex-1
+                        configContext.chooseConfigById(configContext.inputConfigs[nextIndex]?.id||-1)
+                    }
+                    }
                 >
                     Remove
                 </button>

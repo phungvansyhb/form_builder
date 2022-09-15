@@ -73,15 +73,7 @@ export default function InputCreator({}: Props) {
             configContext.setInputConfig(temp);
         }
     }
-    const [inputType, setInputType] = useState(TYPEINPUT.TEXTINPUT);
-    const [listOptions , setListOptions] = useState<{id:number , value : string , label : string}[]|[]>([{id: 1, value :'value 1' , label : 'option 1'}])
-    useEffect(()=>{
-        if(choosingInput){
-            const temp = {...choosingInput, selectOptions : listOptions };
-            setInputConfig(temp)
-        }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    },[listOptions])
+
     if (!configContext || !choosingInput)
         return (
             <div className="shadow-lg p-4 flex gap-4 flex-col ">
@@ -138,16 +130,20 @@ export default function InputCreator({}: Props) {
                 }}
             />
             {/* Default value */}
-            <label htmlFor="name">Default Value :</label>
-            <input
-                name="defaultValue"
-                className="input"
-                value={choosingInput.defaultValue}
-                onChange={(e) => {
-                    const temp = { ...choosingInput, defaultValue: e.target.value };
-                    setInputConfig(temp);
-                }}
-            />
+            {choosingInput.type === TYPEINPUT.TEXTINPUT && (
+                <>
+                    <label htmlFor="name">Default Value :</label>
+                    <input
+                        name="defaultValue"
+                        className="input"
+                        value={choosingInput.defaultValue}
+                        onChange={(e) => {
+                            const temp = { ...choosingInput, defaultValue: e.target.value };
+                            setInputConfig(temp);
+                        }}
+                    />
+                </>
+            )}
             {/* Type input */}
             <label htmlFor="type">Input Type:</label>
             <select
@@ -155,9 +151,25 @@ export default function InputCreator({}: Props) {
                 className="input "
                 value={choosingInput.type}
                 onChange={(e) => {
-                    setInputType(+e.target.value as keyof InputType);
-                    const temp = { ...choosingInput, type: +e.target.value as keyof InputType };
-                    setInputConfig(temp);
+                    console.log(e.target.value);
+                    if (choosingInput) {
+                        let temp: InputConfig;
+                        if (choosingInput.selectOptions) {
+                            temp = {
+                                ...choosingInput,
+                                type: +e.target.value,
+                                defaultValue: choosingInput?.selectOptions[0]?.value,
+                            };
+                        } else {
+                            temp = {
+                                ...choosingInput,
+                                type: +e.target.value,
+                                selectOptions: [{ value: "value1", id: 1, label: "label 1" }],
+                                defaultValue: "value1",
+                            };
+                        }
+                        setInputConfig(temp);
+                    }
                 }}
             >
                 {(Object.keys(TYPEINPUT) as Array<keyof typeof TYPEINPUT>).map((key, index) => {
@@ -172,7 +184,7 @@ export default function InputCreator({}: Props) {
             </select>
             {/* validate */}
             <div className="flex-vertical">
-                {inputType === TYPEINPUT.TEXTINPUT && (
+                {choosingInput.type === TYPEINPUT.TEXTINPUT && (
                     <>
                         {RenderValidate({
                             isRequiredCheck: true,
@@ -219,48 +231,141 @@ export default function InputCreator({}: Props) {
                     </>
                 )}
 
-                {inputType === TYPEINPUT.SELECT && (
+                {choosingInput.type === TYPEINPUT.SELECT && (
                     <>
                         <div>Options </div>
                         <div className="flex-vertical">
-                            {listOptions.map((item, index) => (
+                            {choosingInput?.selectOptions?.map((item, index) => (
                                 <div key={index} className="flex-horizontal justify-around">
                                     <div className="flex-horizontal">
                                         <label htmlFor="">{`label :`}</label>
-                                        <input type="text" className="small-input flex-grow" defaultValue={item.label} onChange={(e)=>{
-                                            const temp = listOptions.map(option=>{
-                                                if(option.id === item.id){
-                                                    option.label= e.target.value
-                                                }return option
-                                            })
-                                            setListOptions(temp)
-                                        } }/>
+                                        <input
+                                            type="text"
+                                            className="small-input flex-grow"
+                                            defaultValue={item.label}
+                                            onChange={(e) => {
+                                                if (choosingInput.selectOptions) {
+                                                    const temp = {
+                                                        ...choosingInput,
+                                                        selectOptions:
+                                                            choosingInput.selectOptions.map(
+                                                                (option) => {
+                                                                    if (option.id === item.id) {
+                                                                        option.label =
+                                                                            e.target.value;
+                                                                    }
+                                                                    return option;
+                                                                }
+                                                            ),
+                                                    };
+                                                    setInputConfig(temp);
+                                                }
+                                            }}
+                                        />
                                     </div>
                                     <div className="flex-horizontal">
                                         <label htmlFor="">{`value :`}</label>
-                                        <input type="text" className="small-input flex-grow" defaultValue={item.value} onChange={(e)=>{
-                                            const temp = listOptions.map(option=>{
-                                                if(option.id === item.id){
-                                                    option.value= e.target.value
-                                                }return option
-                                            })
-                                            //TODO :  not allow duplicate value
-                                            setListOptions(temp)
-                                        } }/>
+                                        <input
+                                            type="text"
+                                            className="small-input flex-grow"
+                                            defaultValue={item.value}
+                                            onChange={(e) => {
+                                                if (choosingInput.selectOptions) {
+                                                    const temp: InputConfig = {
+                                                        ...choosingInput,
+                                                        selectOptions:
+                                                            choosingInput.selectOptions.map(
+                                                                (option) => {
+                                                                    if (option.id === item.id) {
+                                                                        option.value =
+                                                                            e.target.value;
+                                                                    }
+                                                                    return option;
+                                                                }
+                                                            ),
+                                                    };
+                                                    //TODO :  not allow duplicate value
+                                                    setInputConfig(temp);
+                                                }
+                                            }}
+                                        />
                                     </div>
-                                    <button className="btn-secondary-small" onClick={()=>{
-                                        setListOptions(listOptions.filter(options=>options.id!==item.id))
-                                    }}>X</button>
+                                    <button
+                                        className="btn-secondary-small"
+                                        onClick={() => {
+                                            if (choosingInput.selectOptions) {
+                                                const temp: InputConfig = {
+                                                    ...choosingInput,
+                                                    selectOptions:
+                                                        choosingInput.selectOptions.filter(
+                                                            (option) => option.id !== item.id
+                                                        ),
+                                                };
+                                                setInputConfig(temp);
+                                            }
+                                        }}
+                                    >
+                                        X
+                                    </button>
                                 </div>
                             ))}
-                            <div className="w-full text-center"> <button className="btn-primary" onClick={()=>{
-                                const newId = Math.max(...listOptions.map(option=>option.id)) +1
-                                const newOption = {id : newId , value : `option ${newId}` , label : `value ${newId}`}
-                                const temp = [...listOptions]
-                                temp.push(newOption)
-                                setListOptions(temp)
-                            }}>Add options</button></div>
+                            <div className="w-full text-center">
+                                {" "}
+                                <button
+                                    className="btn-primary"
+                                    onClick={() => {
+                                        let newId = 1;
+                                        if (choosingInput.selectOptions) {
+                                            newId =
+                                                Math.max(
+                                                    ...choosingInput.selectOptions.map(
+                                                        (option) => option.id
+                                                    )
+                                                ) + 1;
+                                        }
+                                        const newOption = {
+                                            id: newId,
+                                            value: `value ${newId}`,
+                                            label: `label ${newId}`,
+                                        };
+                                        if (choosingInput.selectOptions) {
+                                            const newOptionList = [...choosingInput.selectOptions];
+                                            newOptionList.push(newOption);
+                                            const temp: InputConfig = {
+                                                ...choosingInput,
+                                                selectOptions: newOptionList,
+                                            };
+                                            setInputConfig(temp);
+                                        } else {
+                                            const temp: InputConfig = {
+                                                ...choosingInput,
+                                                selectOptions: [newOption],
+                                            };
+                                            setInputConfig(temp);
+                                        }
+                                    }}
+                                >
+                                    Add options
+                                </button>
+                            </div>
                         </div>
+
+                        <label htmlFor="name">Default Value :</label>
+                        <select
+                            name="defaultValue"
+                            className="input"
+                            defaultValue={choosingInput?.defaultValue}
+                            onChange={(e) => {
+                                const temp = { ...choosingInput, defaultValue: e.target.value };
+                                setInputConfig(temp);
+                            }}
+                        >
+                            {choosingInput?.selectOptions?.map((item, index) => (
+                                <option value={item.value} key={index}>
+                                    {item.value}
+                                </option>
+                            ))}
+                        </select>
                     </>
                 )}
             </div>

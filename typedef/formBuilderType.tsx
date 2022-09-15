@@ -9,12 +9,12 @@ export enum TYPEINPUT {
 }
 
 enum TYPE_VALIDATE {
-    REQUIRED = 'requried',
-    MAX = 'max',
-    MIN = 'min',
-    MAX_LENGTH = 'maxLength',
-    MIN_LENGTH = 'minLength',
-    PATTERN = 'pattern'
+    REQUIRED = "requried",
+    MAX = "max",
+    MIN = "min",
+    MAX_LENGTH = "maxLength",
+    MIN_LENGTH = "minLength",
+    PATTERN = "pattern",
 }
 
 export interface InputConfig {
@@ -28,15 +28,10 @@ export interface InputConfig {
     layout: number;
     validation?: {
         [key: string]: {
-            value: boolean | string | number,
-            msg: string
-        }
-    },
-    selectOptions? : { id : number , label  :string , value : string }[]
-    selectApi? : {endpoint  :string , valueKey : string , keyLabel: string }
+            value: boolean | string | number;
+            msg: string;
+        };
+    };
+    selectOptions?: { id: number; label: string; value: string }[];
+    selectApi?: { endpoint: string; valueKey: string; keyLabel: string };
 }
-
-
-
-
-
