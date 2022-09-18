@@ -17,6 +17,9 @@
 .small-input{
   @apply w-1/3 p-2 rounded-md border border-gray-200
 }
+.input-error{
+  @apply border-red-500
+}
 .flex-vertical{
   @apply flex flex-col gap-4 justify-center
 }

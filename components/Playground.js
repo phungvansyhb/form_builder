@@ -5,28 +5,48 @@ import { colWidth } from "./ListInput";
 
 export default function Playground({ triggerPlayground, ...props }) {
     const inputContext = useContext(FormBuilderContext);
-    console.log(inputContext.inputConfigs);
-    const { register, handleSubmit, watch, formState } = useForm();
-    
+    const defaultValue = () => {
+        if (!inputContext) return;
+        let result = {};
+        inputContext.inputConfigs.forEach((item) => {
+            result[item.name] = item.defaultValue;
+        });
+        return result;
+    };
+    const {
+        register,
+        handleSubmit,
+        watch,
+        formState: { errors },
+    } = useForm({ mode: "onChange", reValidateMode: "onChange" , defaultValues : defaultValue() });
+
     function renderInput(config, index) {
-        console.log(config);
         return (
             <div className={`${colWidth(config)} flex flex-col gap-2 `} key={index}>
-                <label htmlFor={config.name} >
-                    {config.label} :
-                </label>
+                <label htmlFor={config.name}>{config.label} :</label>
                 {config.type === 0 && (
                     <input
-                        {...register(config.name, { required: {value : true , message : "khong duoc bo trong"}})}
+                        {...register(config.name, {
+                            required: { value: true, message: "khong duoc bo trong" },
+                        })}
                         defaultValue={config.defaultValue}
-                        className="input flex-grow"
+                        className={` input flex-grow ${
+                            errors?.[config.name]?.message && "input-error"
+                        }`}
                     />
                 )}
                 {config.type === 1 && (
                     <select
-                        {...register(config.name, { required: {value : config.validation?.required?.value , message : config.validation?.required?.msg }})}
+                        {...register(config.name, {
+                            required: {
+                                value: config.validation?.required?.value,
+                                message: config.validation?.required?.msg,
+                            },
+                        })}
                         defaultValue={config.defaultValue}
-                        className="input flex-grow"
+                        className={` input flex-grow ${
+                            errors?.[config.name]?.message && "input-error"
+                        }`}
                     >
                         {config.selectOptions?.map((item, index) => (
                             <option key={index} value={item.value}>
@@ -35,10 +55,12 @@ export default function Playground({ triggerPlayground, ...props }) {
                         ))}
                     </select>
                 )}
+                <div className="text-red-500 font-semibold">{errors?.[config.name]?.message}</div>
             </div>
         );
     }
     const onSubmit = (data) => console.log(data);
+   
     return (
         <div>
             <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
@@ -57,16 +79,21 @@ export default function Playground({ triggerPlayground, ...props }) {
                                     {/** form body */}
                                     <div className="flex gap-4">
                                         <form onSubmit={handleSubmit(onSubmit)}>
-                                            <div className="mt-2 grid grid-cols-12 gap-4">
+                                            <div className="my-2 grid grid-cols-12 gap-4">
                                                 {inputContext.inputConfigs.map((config, index) =>
                                                     renderInput(config, index)
                                                 )}
                                             </div>
                                         </form>
-                                        <div className="w-1/2">
+                                        <div className="w-1/2 flex flex-col">
                                             <div className="mb-4">Form value</div>
-                                            <code>{JSON.stringify(watch())}</code>
-                                            <code>{JSON.stringify(formState)}</code>
+                                            <div className="p-4 bg-slate-700 rounded shadow flex-grow">
+                                                <code className="text-yellow-500 break-words">
+                                                    {JSON.stringify(
+                                                        watch({ defaultValue: defaultValue() })
+                                                    )}
+                                                </code>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

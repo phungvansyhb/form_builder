@@ -124,7 +124,7 @@ export default function FormBuilder({}: Props) {
                 <button
                     className=" py-2 px-8 font-bold text-pink-600 rounded border-2 border-pink-600 hover:-translate-y-2 hover:scale-110 transition-all"
                     onClick={() => triggerPlayground(true)}>
-                    Play ground
+                    Preview
                 </button>
             </div>
             {showPlayground && <Playground triggerPlayground={triggerPlayground}/>}
